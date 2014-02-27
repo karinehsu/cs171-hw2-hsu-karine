@@ -94,9 +94,6 @@ var svg = d3.select("body").append("svg")
 
 
 var fill = d3.scale.category10();
-// var rScale = d3.scale.linear()
-// .domain([0,d3.max(data,function(d){return d[0];})])
-// .range([]);
 
 
 var graph = {nodes:[], links:[]};
@@ -159,6 +156,7 @@ var data = d3.json("https://api.github.com/repos/jquery/jquery/commits?per_page=
       })
   })
 
+  // adds in scaling based on time
   function time_layout(){
     force.stop();
     var timeScale = d3.time.scale()
