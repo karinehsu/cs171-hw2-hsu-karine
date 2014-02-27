@@ -103,7 +103,7 @@ var graph = {nodes:[], links:[]};
 var commit_times = [];
 var users = [];
 
-var data = d3.json("https://api.github.com/repos/caleydo/caleydo/commits",function(error, data){
+var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=100",function(error, data){
   // for (var i = 0; i < data.length; i++) {
   //   graph.nodes.push(data[i]);
   // var format = d3.time.format("%Y-%m-%dT%H:%M:%SZ");
@@ -275,6 +275,7 @@ var data = d3.json("https://api.github.com/repos/caleydo/caleydo/commits",functi
 
       //add y-axis
     addAxis = svg.append("g").attr("class","axis")
+    .attr("visibility","visible")
     .attr("transform","translate(100,0)")
     .call(yAxis);
 
