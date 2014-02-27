@@ -1,4 +1,4 @@
-1. Contributors to a repository
+1) Contributors to a repository
 
 Audience: project manager, contributor, and visitor. The visualization graph on the top shows the number of commits, excluding merge commits (as well as the ability filter to see only additions and deletions) each contributor contributes in relation to time for the entire repository. Below, the visualization shows the number of commits per user and ranks them from highest to lowest number of commits. 
 
@@ -12,7 +12,7 @@ If a contributor pushed many commits in a short time interval, the graph on the 
 
 Interactivity could have made it more fun so we could drag the timeline and "zoom in" but it definitely isn't necessary. The readability wouldn't be affected because more boxes are just added for each contributor.
 
-2. Commits Activity 
+2) Commits Activity 
 
 Audience: project manager and contributor. The visualization graph on the top shows number of commits relative to time/date. 
 
@@ -26,7 +26,7 @@ If a sole contributor pushed many commits in a short time interval, the graph on
 
 Again, interactivity could have made it more fun so we could drag the timeline and "zoom in" but it definitely isn't necessary and works as a static graph. The readability might be affected because the more data that is put into the bar chart, the more the scale will have to change. 
 
-3. Code Frequency
+3) Code Frequency
 
 Audience: project manager, contributor, visitor. This visualization graph show additions above the center x-axis  and deletions to the repository as below the center x-axis. 
 
@@ -39,7 +39,7 @@ If a contributor pushes many commits in a short time interval, either additions 
 
 I think in this case interactivity would have made it better so that we could drag the timeline and "zoom in". The static graph doesn't work as much here. The readability might be affected because the more data that is put into the bar chart, the more the scale will have to change. 
 
-5. Punchcard
+4) Punchcard
 
 Audience: project manager. This visualization shows the daily and hourly number of commits. 
 
@@ -48,7 +48,7 @@ GET /repos/:owner/:repo/stats/punch_card
 
 If a contributor pushes many commits in a short time interval, the circle will increase in size. However, the circle is limited to a certain size in the punch card visualization, so we might have to denote even bigger increases in commits by changing the color tints of circles to darker to relate to more activity. 
 
-6. Pulse of a repository
+5) Pulse of a repository
 
 Audience: Project manager and visitor. This visualization shows us the number of pull requests, commits, how many files have changed, and issues that need to be addressed/have been addressed. 
 
@@ -60,7 +60,7 @@ If a contributor pushes many commits in a short time interval, the bar chart wil
 
 Interactivity could have worked here to show more than just a weekly time interval. If we had interactivity we could show a monthly time interval and more. Readability will be affected here so we should scale the cirlces accordingly. 
 
-7. GitHub Network Graph: 
+6) GitHub Network Graph: 
 Audience: Project user or visitor or contributor. This visualization shows the relationships between users, branches, commits, and merges. 
 
 Data used: master branches, number of forks/merges
@@ -72,7 +72,7 @@ GET /repos/:owner/:repo/stats/contributors
 
 Role of interaction is to see how the network of a repository looks like in terms of how many forks/commits/merges were created and when. The interaction allows you to move the timeline and also see the different versions. If many developers suddenly joined the project and pushed commits, there would be more nodes and new branches created. Currently, the graph's readability is preserved by changing the time scale so the nodes are spread further apart. Alternatively, the nodes could be clumped together into one node so size indicates amount of activity, or the nodes could be a different shade of whatever color the branch is.
 
-7. Calendar map 
+7) Calendar map 
 
 Audience: Project user or visitor. This shows relative activity based on how much an individual contributes or works on their github account.
 
