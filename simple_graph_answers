@@ -103,7 +103,7 @@ var graph = {nodes:[], links:[]};
 var commit_times = [];
 var users = [];
 
-var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=100",function(error, data){
+var data = d3.json("https://api.github.com/repos/caleydo/caleydo/commits",function(error, data){
   // for (var i = 0; i < data.length; i++) {
   //   graph.nodes.push(data[i]);
   // var format = d3.time.format("%Y-%m-%dT%H:%M:%SZ");
@@ -252,14 +252,20 @@ var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=10
     force.stop();
     
    // line_layout();
+   var timeScale = d3.time.scale()
+   .domain([min_date, max_date])
+   .range([width/5, width*4/5]);
+
     var categoryScale = d3.scale.ordinal()
     .domain(GetUnique(users))
     .rangePoints([10,500]);
 
     graph.nodes.forEach(function(d, i) {
       d.y = categoryScale(users[i]);
+      d.x = timeScale(d3.time.format("%Y-%m-%dT%H:%M:%SZ").parse(d.commit.author.date));
      // d.y = height/2 + d.cat*20;
     })
+
 
     var yAxis = d3.svg.axis()
     .scale(categoryScale)
@@ -315,15 +321,15 @@ var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=10
 
   function graph_update(delay) {
 
+    //link.transition().duration(delay)
+        // .attr("x1", function(d) { return d.target.x; })
+        // .attr("y1", function(d) { return d.target.y; })
+        // .attr("x2", function(d) { return d.source.x; })
+        // .attr("y2", function(d) { return d.source.y; });
+
+
     link.transition().duration(delay)
-        .attr("x1", function(d) { return d.target.x; })
-        .attr("y1", function(d) { return d.target.y; })
-        .attr("x2", function(d) { return d.source.x; })
-        .attr("y2", function(d) { return d.source.y; });
-
-
-    // link.transition().duration(delay)
-    //   .attr("d", function(d) { return "M0,-5L10,0L0,5"; });
+     .attr("d", function(d) { return "M"+d.target.x+","+d.target.y+"L"+d.target.x+","+d.source.y+"L"+d.source.x+","+d.source.y; });
 
     node.transition().duration(delay)
         .attr("transform", function(d) { 
@@ -374,9 +380,10 @@ var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=10
 
   var link = svg.selectAll(".link")
                 .data(graph.links)
-              .enter().append("line")
+              .enter().append("path")
               //.enter().append("svg: path")//change to path
                 .attr("class", "link")
+                .attr("fill","none")
                 .attr("marker-end","url(#end)");
 
   // var line = d3.svg.path()
