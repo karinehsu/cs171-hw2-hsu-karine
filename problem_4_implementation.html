@@ -1,11 +1,8 @@
-
 <!DOCTYPE html>
 <meta charset="utf-8">
-<head>
-<h1> Number of Commits Per User </h1>
-</head>
+<title>Homework 2 Graph</title>
+<head><h1 align="center">Number of Commits Per User </h1><h5 align="center">Hovering over bars shows most recent contribution made by user</h5></head>
 <style>
-
 .bar {
   fill: steelblue;
 }
@@ -29,29 +26,71 @@
   display: none;
 }
 
+#tooltip {
+        position: absolute;
+        width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: white;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+  }
+
+
+  #tooltip.hidden {
+      display: none;
+  }
+
+  #tooltip p {
+      margin: 0;
+      font-family: sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+  }
+
+
 </style>
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <div id="tooltip" class="hidden">
+        <p><strong>Data</strong></p>
+        <p><span id="value">100</span></p>
+ </div>
+
 <script>
 
+var fill = d3.scale.category10();
+var graph = {nodes:[], links:[]};
+var sorted;
+var dmin;
+var dmax;
+var timeScale;
+var uniScale;
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
+    .rangeRoundBands([0, width], .5);
 
 var y = d3.scale.linear()
     .range([height, 0]);
 
 var xAxis = d3.svg.axis()
-  .scale(x)
-  .orient("bottom");
+    .scale(x)
+    .orient("bottom");
 
 var yAxis = d3.svg.axis()
-  .scale(y)
-  .orient("left");
+    .scale(y)
+    .orient("left");
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -59,54 +98,48 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var users = [];
-//var max_commits= 0;
 var commits = [];
+var count = [];
+var uniqueUsers =[];
 
- d3.json("https://api.github.com/repos/jquery/jquery/commits?per_page=100",function(error, data){
-  
-  for (var i = 0; i < data.length; i++) {  
-    users[i] = (data[i].author.login);
-  }
-  console.log(users);
+var format = d3.time.format("%Y-%m-%dT%H:%M:%SZ");
 
 
-  function GetUnique(users)
-  {
-    var unique_users = [];
-    
-    for (var i = 0; i < users.length; i++)
-    {
-        if ((jQuery.inArray(users[i], unique_users)) == -1)
-        {
-            unique_users.push(users[i]);
-        }
-    }
-   
-    return unique_users;
-  }
+var data = d3.json("https://api.github.com/repos/mbostock/d3/commits?per_page=100", 
+  function(data) {
 
-  //GetUnique(users).push(name);
+data.forEach(function(d, i) {
+    commits.push(d.author.login);
+})
 
+// unique user function
+uniqueUsers.push(data[0].author.login);
+data.forEach(function(d, i){
+  for (var j = 0; j < uniqueUsers.length; j++){
+    name = d.author.login;
+    if(uniqueUsers[j] === name)
+      break;
+    else if(j == uniqueUsers.length-1)
+      uniqueUsers.push(name);
+  } 
+});
 
-  //counts number of commits per user
-  for (var i =0; i< data.length; i++){
-    for (var j=0; j<GetUnique(users).length; j++){
-      if (users[i] === GetUnique(users)[j]){
-        if (typeof commits[j] =="undefined")
-          commits[j] = 1;
-        else
-          commits[j] = commits[j] + 1;
-      }
+//finds commits per user
+for(var i=0; i<commits.length; i++){
+  for(var k=0; k<uniqueUsers.length; k++){
+    if(commits[i] == uniqueUsers[k]){
+      if (typeof count[k] == 'undefined')
+        count[k] = 1;
+      else
+        count[k] = count[k] + 1;
     }
   }
+}
+//finds max count
+var max_count = d3.max(count);
 
-  //console.log(commits);
-  var max_commits = d3.max(commits);
-
-  x.domain(data.map(function() { return GetUnique(users); }));
-
-  y.domain([0, max_commits]);
+  x.domain(data.map(function(d) { return d.author.login; }));
+  y.domain([0, max_count]);
 
   svg.append("g")
       .attr("class", "x axis")
@@ -120,26 +153,57 @@ var commits = [];
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Number of Commits");
+      .style("text-anchor", "end");
+
+  //connects commits to users
+  function count(value){
+    for(var i=0; i<uniqueUsers.length; i++){
+      if(value == uniqueUsers[i]){
+          console.log(y(count[i]));
+          return y(count[i]);
+      }
+  }
+}
+
+
 
   svg.selectAll(".bar")
       .data(data)
     .enter().append("rect")
       .attr("class", "bar")
+      .style("fill", function(d) { return color(d.commit.author.date); })
+      .attr("data", function(data) { return data.commit.author.name + '\n' + format.parse(data.commit.author.date);})
       .attr("x", function(d) { return x(d.author.login); })
       .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(max_commits); })
-      .attr("height", function(d) { return height - y(max_commits); });
+      .attr("y", function(d){ return count(d.author.login);})
+      .attr("height", function(d) { 
+        console.log(d.author.login);
+        console.log(count(d.author.login));
+        return height - count(d.author.login)});
+
+//   d3.select("xAxis")
+//   .attr({
+//       transform: function (d) {
+//           return "rotate(-60, 0, 0)";
+//       }
+// });
+
+   d3.selectAll(".bar").on("mouseover",function(d){
+    d3.select("#tooltip").select('#value').text(d3.select(this).attr("data"));
+    d3.select(this).attr("fill", "red");
+    d3.selectAll("." + d.author.login).attr("fill","orange");
+
+    d3.select("#tooltip").classed("hidden",false);
+  })
+  .on("mouseout",function(d){
+    d3.select("#tooltip").classed("hidden",true);
+    d3.selectAll("."+d.author.login).attr("fill","blue");
+
+  })
 
 });
 
-// commits/user
-// count how many times/user
-function type(d) {
-  d.frequency = +d.frequency;
-  return d;
-}
+
 
 </script>
 </body>
