@@ -1,17 +1,15 @@
+
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Homework 2 Graph</title>
-<head><h1 align="center">Number of Commits Per User </h1><h5 align="center">Hovering over bars shows most recent contribution made by user</h5></head>
 <style>
-.bar {
-  fill: steelblue;
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: relative;
+  width: 960px;
 }
 
-.bar:hover {
-  fill: brown;
-}
-
-.axis {
+.axis text {
   font: 10px sans-serif;
 }
 
@@ -22,64 +20,51 @@
   shape-rendering: crispEdges;
 }
 
+.bar {
+  fill: steelblue;
+  fill-opacity: .9;
+}
+
 .x.axis path {
   display: none;
 }
 
-#tooltip {
-        position: absolute;
-        width: 200px;
-        height: auto;
-        padding: 10px;
-        background-color: white;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        pointer-events: none;
-  }
-
-
-  #tooltip.hidden {
-      display: none;
-  }
-
-  #tooltip p {
-      margin: 0;
-      font-family: sans-serif;
-      font-size: 16px;
-      line-height: 20px;
-  }
-
+label {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
 
 </style>
 <body>
-  <script src="http://d3js.org/d3.v3.min.js"></script>
   <div id="tooltip" class="hidden">
         <p><strong>Data</strong></p>
-        <p><span id="value">100</span></p>
+        <p><span id="value"><em>Hover Over Bar to Display Data</em></span></p>
  </div>
 
+    <form>
+    <label><input type="checkbox"> View Top Contributor(s)</label><br>
+    
+  </form>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var fill = d3.scale.category10();
-var graph = {nodes:[], links:[]};
-var sorted;
-var dmin;
-var dmax;
-var timeScale;
-var uniScale;
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
+var formatPercent = d3.format(".0%");
+
 var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .5);
+    .rangeRoundBands([0, width], .1, 1);
 
 var y = d3.scale.linear()
     .range([height, 0]);
+
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -88,9 +73,6 @@ var xAxis = d3.svg.axis()
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left");
-
-var color = d3.scale.ordinal()
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -124,6 +106,7 @@ data.forEach(function(d, i){
   } 
 });
 
+
 //finds commits per user
 for(var i=0; i<commits.length; i++){
   for(var k=0; k<uniqueUsers.length; k++){
@@ -135,11 +118,23 @@ for(var i=0; i<commits.length; i++){
     }
   }
 }
+
+
+    // counts commits per user   
+    function count(value){
+    for(var i=0; i<uniqueUsers.length; i++){
+      if(value == uniqueUsers[i]){
+          //console.log(y(count[i]));
+          return y(count[i]);
+      }
+  }
+}
 //finds max count
 var max_count = d3.max(count);
 
   x.domain(data.map(function(d) { return d.author.login; }));
   y.domain([0, max_count]);
+
 
   svg.append("g")
       .attr("class", "x axis")
@@ -153,40 +148,126 @@ var max_count = d3.max(count);
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", ".71em")
-      .style("text-anchor", "end");
+      .style("text-anchor", "end")
+      .text("Number of Commits");
 
-  //connects commits to users
-  function count(value){
-    for(var i=0; i<uniqueUsers.length; i++){
-      if(value == uniqueUsers[i]){
-          console.log(y(count[i]));
-          return y(count[i]);
-      }
-  }
-}
-
-
-
-  svg.selectAll(".bar")
+    svg.selectAll(".bar")
       .data(data)
     .enter().append("rect")
       .attr("class", "bar")
       .style("fill", function(d) { return color(d.commit.author.date); })
-      .attr("data", function(data) { return data.commit.author.name + '\n' + format.parse(data.commit.author.date);})
+      .attr("data", function(data,i) { return data.commit.author.name + ',' + format.parse(data.commit.author.date) ;})
       .attr("x", function(d) { return x(d.author.login); })
       .attr("width", x.rangeBand())
       .attr("y", function(d){ return count(d.author.login);})
       .attr("height", function(d) { 
-        console.log(d.author.login);
-        console.log(count(d.author.login));
         return height - count(d.author.login)});
 
-//   d3.select("xAxis")
-//   .attr({
-//       transform: function (d) {
-//           return "rotate(-60, 0, 0)";
-//       }
-// });
+
+      
+  d3.select("input").on("change", change);
+
+
+  function change() {
+    //clearTimeout(sortTimeout);
+
+    // Copy-on-write since tweens are evaluated after a delay.
+    var x0 = x.domain(data.sort(this.checked
+        ? function(a, b) {   console.log(b.commit - a.commit); return b.commit - a.commit; }
+        : function(a, b) { return uniqueUsers.sort(); })
+        .map(function(i) { return uniqueUsers[i]; }))
+        .copy()
+
+        ;
+
+
+
+    var transition = svg.transition().duration(500),
+        delay = function(d, i) { return i * 50; };
+
+    transition.selectAll(".bar")
+        .delay(delay)
+        .attr("x", function(d) { return x0(d.commit.author); });
+
+  }
+   
+var sortOrder = false;
+var sortBars = function () {
+    sortOrder = !sortOrder;
+    
+    sortItems = function (a, b) {
+        if (sortOrder) {
+            return a.value - b.value;
+        }
+        return b.value - a.value;
+    };
+
+    svg.selectAll("rect")
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .attr("x", function (d, i) {
+        return xScale(i);
+    });
+
+    svg.selectAll('text')
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .text(function (d) {
+        return d.value;
+    })
+        .attr("text-anchor", "middle")
+        .attr("x", function (d, i) {
+        return xScale(i) + xScale.rangeBand() / 2;
+    })
+        .attr("y", function (d) {
+        return h - yScale(d.value) + 14;
+    });
+};
+// Add the onclick callback to the button
+d3.select("#sort").on("click", randomSort);
+
+function randomSort() {
+
+  
+  svg.selectAll(".bar")
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .attr("x", function (d, i) {
+        return xScale(i);
+    });
+
+    svg.selectAll('text')
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .text(function (d) {
+        return d.value;
+    })
+        .attr("text-anchor", "middle")
+        .attr("x", function (d, i) {
+        return xScale(i) + xScale.rangeBand() / 2;
+    })
+        .attr("y", function (d) {
+        return h - yScale(d.value) + 14;
+    });
+}
+
+
 
    d3.selectAll(".bar").on("mouseover",function(d){
     d3.select("#tooltip").select('#value').text(d3.select(this).attr("data"));
@@ -202,8 +283,6 @@ var max_count = d3.max(count);
   })
 
 });
-
-
 
 </script>
 </body>
